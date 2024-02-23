@@ -13,6 +13,37 @@ class BookingRepository extends CrudRepository {
     const response = await Booking.create(data, { transaction: transaction });
     return response;
   }
+
+  //overriding get function so we can pass transaction object in to the method thatswhy
+
+  async get(id, transaction) {
+    const response = await this.model.findByPk(id, {
+      transaction: transaction,
+    });
+
+    if (!response) {
+      throw new AppError("Resource not found", StatusCodes.NOT_FOUND);
+    }
+
+    return response;
+  }
+
+  async update(id, data, transaction) {
+    const response = await this.model.update(
+      data,
+      {
+        where: {
+          id: id,
+        },
+      },
+      { transaction: transaction }
+    );
+
+    if (!response) {
+      throw new AppError("Booking not found", StatusCodes.NOT_FOUND);
+    }
+    return response;
+  }
 }
 
 module.exports = BookingRepository;

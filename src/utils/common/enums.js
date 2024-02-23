@@ -6,9 +6,9 @@ const SEAT_TYPE = {
 };
 
 const BOOKING_STATUS = {
-  BOOKED: "booking",
-  CANCELLED: "Cancelled",
-  INITIATED: "inititated",
+  BOOKED: "booked",
+  CANCELLED: "cancelled",
+  INITIATED: "initiated",
   PENDING: "pending",
 };
 module.exports = { SEAT_TYPE, BOOKING_STATUS };
