@@ -1,5 +1,6 @@
 module.exports = {
   InfoController: require("./info-controller"),
+  BookingController: require("./booking-controller"),
 };
 
 // new technique:- exporting all the controllers files from index.js

@@ -1,4 +1,6 @@
-module.exports = {};
+module.exports = {
+  BookingService: require("./booking-service"),
+};
 
 // new technique:- exporting all the services files from index.js
 
