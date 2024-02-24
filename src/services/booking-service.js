@@ -52,7 +52,10 @@ async function makePayment(data) {
     const currentTime = new Date();
     const differenceTime = currentTime - bookingTime;
     console.log(differenceTime);
-    if (differenceTime > 30000) {
+    // if difference between booking time and current time is more than 5 minutes means we want to expire the booking and cancel the booking
+    if (differenceTime > 50) {
+      cancelBooking(data.bookingId);
+
       await bookingRepository.update(
         data.bookingId,
         { status: CANCELLED },
@@ -75,7 +78,7 @@ async function makePayment(data) {
       );
     }
 
-    const response = await bookingRepository.update(
+    await bookingRepository.update(
       data.bookingId,
       { status: BOOKED },
       transaction
@@ -88,7 +91,48 @@ async function makePayment(data) {
   }
 }
 
+// if we initiale or say call cancelbooking function to cancel the booking and update seats by increasing the seat by reverting it back to normal seat before booking by this the cancelbooking transaction will commit and makepayment transaction will rollback as we will expire the bookin and throw error booking expired and therefore transaction will rollback.
+
+async function cancelBooking(bookingId) {
+  const transaction = await db.sequelize.transaction();
+  try {
+    const bookingDetails = await bookingRepository.get(bookingId);
+    if (bookingDetails.status == CANCELLED) {
+      await transaction.commit();
+      return true;
+    }
+    await axios.patch(
+      `${ServerConfig.FLIGHT_SERVICE}api/v1/flights/${bookingDetails.flightId}/seats`,
+      { seats: bookingDetails.noOfSeats, dec: 0 } //dec:false as 0 acts as falsy value
+    );
+
+    await bookingRepository.update(
+      bookingId,
+      { status: CANCELLED },
+      transaction
+    );
+
+    await transaction.commit();
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+}
+
+async function cancelOldBookings() {
+  try {
+    console.log("inside service");
+    const time = new Date(Date.now() - 1000 * 300);
+    // getting 5 minutes ago time from current time in order to detect/check the bookings timestamp if they are greater than 5 minutes we will cancel time by runingn cron job on them.
+    const response = bookingRepository.cancelBooking(time);
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = {
   createBooking,
   makePayment,
+  cancelOldBookings,
 };
