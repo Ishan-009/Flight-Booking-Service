@@ -53,7 +53,7 @@ async function makePayment(data) {
     const differenceTime = currentTime - bookingTime;
     console.log(differenceTime);
     // if difference between booking time and current time is more than 5 minutes means we want to expire the booking and cancel the booking
-    if (differenceTime > 50) {
+    if (differenceTime > 300000) {
       cancelBooking(data.bookingId);
 
       await bookingRepository.update(
