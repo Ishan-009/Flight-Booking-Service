@@ -1,4 +1,4 @@
-const { ServerConfig, Logger } = require("./config/index");
+const { ServerConfig, Logger, Queue } = require("./config/index");
 const express = require("express");
 const apiRoutes = require("./routes/index");
 const app = express();
@@ -9,8 +9,10 @@ app.use(express.urlencoded({ extended: true }));
 // to read url encodeed stuff
 app.use("/api", apiRoutes);
 
-app.listen(ServerConfig.PORT, () => {
+app.listen(ServerConfig.PORT, async () => {
   console.log(`Server Listening on port ${ServerConfig.PORT}`);
   Logger.info("Successfully started the server");
   Cron();
+  await Queue.connectQueue();
+  console.log("Queue Connected");
 });
